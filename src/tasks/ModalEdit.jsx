@@ -1,52 +1,17 @@
 import React, { useState, useEffect } from "react";
 
-export function ModalEdit({ dataTask }) {
+export function ModalEdit({ dataTask, headlenSetInputs}) {
 
-
-	const [formData, setFormData] = useState({ title: dataTask.title, description: dataTask.description });
-
-	const handleSubmit = (event) => {
-		event.preventDefault();
-
-		const form = document.getElementById('form-edit');
-		const formData = new FormData(form);
-		const formObjetNormlizate = formDataToObject(formData)
-
-
-		fetch(`${api}/create`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(formObjetNormlizate)
-		})
-			.then((response) => response.json())
-			.then((json) => {
-
-				const result = json.body;
-
-				console.log(result)
-
-			})
-
-	};
-
-	const handleChange = (event) => {
-		const { name, value } = event.target;
-
-		setFormData((prevFormData) => ({ ...prevFormData, [name]: value }));
-	};
-
-
-	function formDataToObject(formData) {
-		const normalizeValues = (values) => (values.length > 1) ? values : values[0];
-
-		const formElemKeys = Array.from(formData.keys());
-
-		return Object.fromEntries(
-			// store array of values or single value for element key
-			formElemKeys.map(key => [key, normalizeValues(formData.getAll(key))])
-		);
+	const [tast, setTasks] = useState([])
+	
+	headlenSetInputs = () => { 
+		setTasks(dataTask)
 	}
 
+	const handleInput = (e) => {
+        e.persist();
+        setTasks({...tast, [e.target.name]: e.target.value });
+    }
 
 	return (
 		<>
@@ -57,19 +22,19 @@ export function ModalEdit({ dataTask }) {
 							<h1 className="modal-title fs-5" id="exampleModalLabel">Editar Tarea</h1>
 							<button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 						</div>
-						<form id="form-edit" className="row g-3" onSubmit={handleSubmit}>
+						<form id="form-edit" className="row g-3">
 
 							<div className="modal-body">
 
 
 								<div className="col-md-12 mt-2">
 									<label htmlFor="inputEmail4" className="form-label">Titulo:</label>
-									<input type="text" className="form-control" name='title' id='title' value={formData.title} onChange={handleChange} />
+									<input type="text" className="form-control" name='title' id='title'  onChange={handleInput} value={tast.title} />
 								</div>
 
 								<div className="col-md-12 mt-2">
 									<label htmlFor="inputPassword4" className="form-label">Descripcion:</label>
-									<input type="text" className="form-control" name='description' id='description' value={formData.description} onChange={handleChange} />
+									<input type="text" className="form-control" name='description' id='description' />
 								</div>
 							</div>
 

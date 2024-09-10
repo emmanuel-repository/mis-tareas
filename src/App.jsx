@@ -1,16 +1,14 @@
 import { TableTask } from './tasks/TableTask'
 import React, { useState, useEffect } from "react";
-import { ModalEdit } from './tasks/ModalEdit';
-import { Modal } from 'bootstrap';
 import './App.scss'
 
 function App() {
 
   const api = 'http://localhost:4000/api/my-tasks';
   const videoSrc = "https://assets.codepen.io/3364143/7btrrd.mp4";
-  const [formData, setFormData] = useState({ title: "", description: "" });
+  const [formData, setFormData] = useState({ title: "", description: "", slug: "" });
   const [tasks, setTasks] = useState([]);
-  const [taskEdit, setDataEdit] = useState([]);
+  const [isEdit, setIsEdit] = useState(false)
 
   useEffect(() => {
 
@@ -24,7 +22,8 @@ function App() {
 
   }, []);
 
-  const handleSubmit = (event) => {
+  const handleSubmitSave = (event) => {
+
     event.preventDefault();
 
     fetch(`${api}/create`, {
@@ -33,31 +32,87 @@ function App() {
       body: JSON.stringify(formData)
     })
       .then((response) => response.json())
-      .then((json) => {
+      .catch(function (error) {
 
+        console.log(error)
+        return;
+
+      }).then((json) => {
         const result = json.body;
-        setTasks((tasks) => [...tasks, result])
+
+        setTasks((tasks) => [...tasks, result]);
+        setIsEdit(false)
 
       })
-
   };
+
+  const handleSubmitEdit = (event) => {
+
+    event.preventDefault();
+
+    fetch(`${api}/update/${formData.slug}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData)
+    })
+      .then((response) => response.json())
+      .catch(function (error) {
+
+        console.log(error)
+        return;
+
+      }).then((json) => {
+        const result = json.body;
+
+        let tempArray = [...tasks];
+
+        const newList = tempArray.map((el) => {
+          if (el.slug === result.slug) { return result; }
+          return el;
+        });
+
+        setTasks(newList)
+      });
+  }
 
   const handleChange = (event) => {
     const { name, value } = event.target;
 
-    setFormData((prevFormData) => ({ ...prevFormData, [name]: value }));
+    setFormData((formData) => ({ ...formData, [name]: value }));
   };
 
   const handleSendData = (data) => {
-    const modalElement = document.getElementById('exampleModal');
-    const modal = new Modal(modalElement, {
-      backdrop: false,
-      keyboard: true,
-      focus: true
-    });
-    modal.show();
+    setIsEdit(true);
+    setFormData(data);
+  }
 
-    setDataEdit(data)
+  const hundleDeleteTask = (data) => {
+
+    fetch(`${api}/delete-task/${data.slug}`, { method: 'DELETE' }).catch(function (error) {
+
+      console.log(error)
+      return;
+
+    }).then((response) => response.json())
+      .then((json) => {
+
+        const slug = json.body;
+        let tempArray = [...tasks];
+
+        const newList = tempArray.filter((value) => value.slug !== slug);
+
+        setTasks(newList);
+      })
+
+  }
+
+  const hundleUpdateStatus = (data) => { 
+    console.log(data)
+  }
+
+  const cancel = () => {
+    setIsEdit(false)
+    setFormData({ title: "", description: "", slug: "" })
   }
 
   return (
@@ -73,7 +128,7 @@ function App() {
 
         <div className="app">
 
-          <ModalEdit dataTask={taskEdit}/>
+          {/* <ModalEdit dataTask={taskEdit} headlenSetInputs={headlenSetInputs}/> */}
 
           <div className="wrapper">
 
@@ -90,10 +145,10 @@ function App() {
                     <div className="app-card">
 
                       <div className="row mb-3">
-                        <span>  Agregar nueva Tarea  </span>
+                        <span> {isEdit ? "Editar Tarea" : "Agregar nueva Tarea"} </span>
                       </div>
 
-                      <form className="row g-3" onSubmit={handleSubmit}>
+                      <form className="row g-3" onSubmit={isEdit ? handleSubmitEdit : handleSubmitSave}>
 
                         <div className="col-md-6 mt-2">
                           <label htmlFor="inputEmail4" className="form-label">Titulo:</label>
@@ -107,7 +162,19 @@ function App() {
 
                         <div className="col-sm-12 d-flex justify-content-end">
                           <div className="app-card-buttons">
-                            <button type="submit" className="content-button status-button">Guardar</button>
+                            <button type="submit" className="content-button status-button mr-2">{isEdit ? "Editar" : "Guardar"}</button>
+
+                            {(() => {
+
+                              if (isEdit) {
+                                return (
+                                  <>
+                                    <button className="content-button status-button open" onClick={() => { cancel() }}>Cancelar</button>
+                                  </>
+                                )
+                              }
+
+                            })()}
                           </div>
                         </div>
 
@@ -120,7 +187,7 @@ function App() {
                     <div className="app-card">
 
                       <div className="col-sm-12 mt-2">
-                        <TableTask tasks={tasks} handleSendData={handleSendData} />
+                        <TableTask tasks={tasks} handleSendData={handleSendData} hundleDeleteTask={hundleDeleteTask} hundleUpdateStatus={hundleUpdateStatus} />
                       </div>
 
                     </div>
@@ -133,10 +200,6 @@ function App() {
           </div>
         </div>
       </div>
-
-
-
-
     </>
   );
 

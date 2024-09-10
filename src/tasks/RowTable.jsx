@@ -41,10 +41,10 @@ export function RowTable({ dataTask, editTask, deleteTask, updateStatus }) {
 					<button type="button" className="btn btn-xs btn-outline-info me-2 btn-sm" onClick={() => editTask(dataTask)}>
 						Editar
 					</button>
-					<button type="button" className="btn btn-outline-light btn-sm  me-2">
+					<button type="button" className="btn btn-outline-light btn-sm  me-2" onClick={() => updateStatus(dataTask)}>
 						Estatus
 					</button>
-					<button type="button" className="btn btn-outline-danger btn-sm">
+					<button type="button" className="btn btn-outline-danger btn-sm" onClick={() => deleteTask(dataTask)}>
 						Eliminar
 					</button>
 				</td>
