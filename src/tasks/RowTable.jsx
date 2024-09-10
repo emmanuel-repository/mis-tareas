@@ -1,0 +1,55 @@
+export function RowTable({ dataTask, editTask, deleteTask, updateStatus }) {
+
+
+	return (
+		<>
+			<tr key={dataTask.slug}>
+				<td>{dataTask.title}</td>
+				<td>{dataTask.description}</td>
+				<td>
+					{(() => {
+
+						if (dataTask.status == 'curso') {
+							return (
+								<span className="status">
+									<span className="status-circle"></span>
+									En curso
+								</span>
+							)
+						}
+
+						if (dataTask.status == 'terminada') {
+							return (
+								<span className="status">
+									<span className="status-circle green"></span>
+									Terminado
+								</span>
+							)
+						}
+
+						if (dataTask.status == 'pendiente') {
+							return (
+								<span className="status">
+									<span className="status-circle red"></span>
+									Pendiente
+								</span>
+							)
+						}
+					})()}
+				</td>
+				<td>
+					<button type="button" className="btn btn-xs btn-outline-info me-2 btn-sm" onClick={() => editTask(dataTask)}>
+						Editar
+					</button>
+					<button type="button" className="btn btn-outline-light btn-sm  me-2">
+						Estatus
+					</button>
+					<button type="button" className="btn btn-outline-danger btn-sm">
+						Eliminar
+					</button>
+				</td>
+			</tr>
+		</>
+	)
+
+}
