@@ -8,17 +8,7 @@ export function RowTable({ dataTask, editTask, deleteTask, updateStatus }) {
 				<td>{dataTask.description}</td>
 				<td>
 					{(() => {
-
-						if (dataTask.status == 'curso') {
-							return (
-								<span className="status">
-									<span className="status-circle"></span>
-									En curso
-								</span>
-							)
-						}
-
-						if (dataTask.status == 'terminada') {
+						if (dataTask.status == 'terminado') {
 							return (
 								<span className="status">
 									<span className="status-circle green"></span>

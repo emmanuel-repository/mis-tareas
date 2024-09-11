@@ -9,6 +9,7 @@ function App() {
   const [formData, setFormData] = useState({ title: "", description: "", slug: "" });
   const [tasks, setTasks] = useState([]);
   const [isEdit, setIsEdit] = useState(false)
+  const [errorForm, setError] = useState([]);
 
   useEffect(() => {
 
@@ -18,6 +19,19 @@ function App() {
       fetch(api).then((response) => response.json()).then((json) => {
         setTasks(json.body);
       });
+
+      const myArray = [5, 2, 5, 7, 2, 4, 5];
+     
+      const count = myArray.reduce(
+        (acc, val) => (
+          (acc[val] = (acc[val] || 0) + 1) > acc.maxCount &&  (acc.maxCount = acc[val]) && (acc.maxNum = val),
+          acc
+        ), { maxNum: null, maxCount: 0 }
+      )
+      //Valor más repetido
+      console.log(`El número más repetido es: ${count.maxNum} con: ${count.maxCount} repeticiones`)
+      //Conteo en general
+      console.log('El arreglo es:', myArray)
     }
 
   }, []);
@@ -25,6 +39,10 @@ function App() {
   const handleSubmitSave = (event) => {
 
     event.preventDefault();
+
+    const isValid = valiteForm(formData);
+
+    if (isValid.length != 0) return;
 
     fetch(`${api}/create`, {
       method: 'POST',
@@ -42,6 +60,7 @@ function App() {
 
         setTasks((tasks) => [...tasks, result]);
         setIsEdit(false)
+        setError([])
 
       })
   };
@@ -49,6 +68,10 @@ function App() {
   const handleSubmitEdit = (event) => {
 
     event.preventDefault();
+
+    const isValid = valiteForm(formData);
+
+    if (isValid.length != 0) return;
 
     fetch(`${api}/update/${formData.slug}`, {
       method: 'PUT',
@@ -71,7 +94,7 @@ function App() {
           return el;
         });
 
-        setTasks(newList)
+        setTasks(newList);
       });
   }
 
@@ -106,8 +129,47 @@ function App() {
 
   }
 
-  const hundleUpdateStatus = (data) => { 
-    console.log(data)
+  const hundleUpdateStatus = (data) => {
+
+    fetch(`${api}/update-status/${data.slug}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    })
+      .then((response) => response.json())
+      .catch(function (error) {
+
+        console.log(error)
+        return;
+
+      }).then((json) => {
+
+        const result = json.body;
+
+        let tempArray = [...tasks];
+
+        const newList = tempArray.map((el) => {
+          if (el.slug === result.slug) { return result; }
+          return el;
+        });
+
+        setTasks(newList);
+
+      });
+  }
+
+  const valiteForm = (dataForm) => {
+
+    const error = [];
+    const notValid = [undefined, null, ''];
+
+    if (notValid.includes(dataForm.title)) error.push({ message: 'El  Titulo es requerido' });
+
+    if (notValid.includes(dataForm.description)) error.push({ message: 'La Descripcion es requerido' });
+
+    setError(error);
+    return error;
+
   }
 
   const cancel = () => {
@@ -133,13 +195,14 @@ function App() {
           <div className="wrapper">
 
             <div className="main-container">
+
+              <div className="main-header">
+                <a className="menu-link-main" href="#"><h2 className='pt-2'>Mis tareas</h2></a>
+              </div>
+
               <div className="content-wrapper">
 
                 <div className="content-section">
-
-                  <div className="content-section-title">
-                    <h2>Mis tareas</h2>
-                  </div>
 
                   <div className="apps-card">
                     <div className="app-card">
@@ -179,6 +242,20 @@ function App() {
                         </div>
 
                       </form>
+
+                      <div className="row">
+                        {
+                          errorForm.map((error) => {
+                            return (
+                              <>
+                                <div className="col-sm-12 text-danger">
+                                  {error.message}
+                                </div>
+                              </>
+                            )
+                          })
+                        }
+                      </div>
 
                     </div>
                   </div>

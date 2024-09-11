@@ -18,15 +18,13 @@ export function TableTask({ tasks, handleSendData, hundleDeleteTask, hundleUpdat
 						<th>Titulo</th>
 						<th>Descripcion</th>
 						<th>Estatus</th>
-						<th>Acciones</th>
+						<th style={{width: '20%'}}>Acciones</th>
 					</tr>
 				</thead>
 				<tbody>
-
 					{tasks.map((dataTask) => (
 						<RowTable dataTask={dataTask} editTask={editTask} deleteTask={delateTask} updateStatus={updateStatus}/>
 					))}
-
 				</tbody>
 			</table>
 
